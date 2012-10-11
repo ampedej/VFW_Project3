@@ -62,8 +62,12 @@ window.addEventListener("DOMContentLoaded", function(){
 	}
 	
 	//Store Data Function
-	function storeData(){
+	function storeData(key){
+		if(!key){
 		var id					= Math.floor(Math.random()*100000001);
+		}else{
+			id = key;
+		}
 		getSelectedRadio()
 		var item				= {};
 			item.rname 			= ["Recipe Name:", $('rname').value];
@@ -133,7 +137,7 @@ window.addEventListener("DOMContentLoaded", function(){
 		deleteLink.href = "#";
 		deleteLink.key = key;
 		var deleteText = "Delete This recipe";
-		//deleteLink.addEventListener("click", deleteItem);
+		deleteLink.addEventListener("click", deleteItem);
 		deleteLink.innerHTML = deleteText;
 		linksLi.appendChild(deleteLink)
 	}
@@ -145,6 +149,9 @@ window.addEventListener("DOMContentLoaded", function(){
 		
 		//Show form
 		toggleControls("off");
+		//Could click on display while editing and it would show item twice even though it wasn't saved twice,
+		//Turned display link off when editing an item to prevent issue.
+		displayLink.style.display  = "none";
 		
 		//Populate form with existing data
 		$('rname').value = item.rname[1];
@@ -170,9 +177,21 @@ window.addEventListener("DOMContentLoaded", function(){
 		save.removeEventListener("click", storeData);
 		$('submit').value = "Edit Recipe";	
 		var editSubmit = $('submit');
-		//Save key value established.
+		//Save key value established in this function.
+		//Use that value when we save the data.
 		editSubmit.addEventListener("click", validate);
 		editSubmit.key = this.key;
+	}
+	
+	function deleteItem(){
+		var ask = confirm("Are your sure you want to delete this recipe?");
+		if(ask){
+			localStorage.removeItem(this.key);
+			alert("Recipe was deleted!");
+			window.location.reload();
+		}else{
+			alert("Recipe was NOT deleted.");
+		}
 	}
 	
 	//Clear Local Function
@@ -187,13 +206,64 @@ window.addEventListener("DOMContentLoaded", function(){
 		}
 	}
 	
-	function validate(){
+	//Validate form function
+	function validate(e){
+		var getRname = $('rname');
+		var getRtype = $('rtype');
+		var getRingredients = $('ringredients');
+		var getRdirections = $('rdirections');
 		
+		//Reset error messages
+		errMsg.innerHTML = "";
+		getRname.style.border = "1px solid black";
+		getRtype.style.border = "1px solid black";
+		getRingredients.style.border = "1px solid black";
+		getRdirections.style.border = "1px solid black";
+		
+		//Error messages
+		var messageAry = [];
+		//Recipe name validation
+		if (getRname.value === ""){
+			var rNameError = "Please give this recipe a name!";
+			getRname.style.border = "1px solid red";
+			messageAry.push(rNameError);
+		}
+		//Recipe type validation
+		if (getRtype.value === "--Meats--" || getRtype.value === "--Pasta--" || getRtype.value === "--Soup--" || getRtype.value === "--Dessert--"){
+			var rTypeError = "Please choose recipe type.";
+			getRtype.style.border = "1px solid red";
+			messageAry.push(rTypeError);
+		}
+		//Recipe Ingredients validation
+		if (getRingredients.value === ""){
+			var rIngredientsError = "Please provide recipe ingredients!";
+			getRingredients.style.border = "1px solid red";
+			messageAry.push(rIngredientsError);
+		}
+		//Recipe directions validation
+		if (getRdirections.value === ""){
+			var rDirectionsError = "Please provide recipe directions!";
+			getRdirections.style.border = "1px solid red";
+			messageAry.push(rDirectionsError);
+		}
+		//If error messages, display on screen
+		if(messageAry.length >= 1){
+			for (var i = 0, j = messageAry.length; i < j; i++){
+				var txt = document.createElement('li');
+				txt.innerHTML = messageAry[i];
+				errMsg.appendChild(txt);
+			}
+			e.preventDefault();
+			return false;
+		}else{
+			storeData(this.key);
+		}
 	}
 	
 	//Variable Defaults
 	var recipeTypes = ["--Meats--", "Chicken", "Beef", "Pork", "Fish", "--Pasta--", "Spaghetti", "Lasagna", "Pasta Salad", "Ravioli", "--Soups--", "Chili", "Chowder", "Stew", "Seafood", "--Dessert--", "Cake", "Cookies", "Pie", "Mousse"],
-		categoryValue;
+		categoryValue,
+		errMsg = $('errors');
 	makeTypes();
 	
 	//Link & click submit events.
@@ -202,6 +272,6 @@ window.addEventListener("DOMContentLoaded", function(){
 	var clearLink = $('clear');
 	clearLink.addEventListener("click", clearLocal);
 	var save = $('submit');
-	save.addEventListener("click", storeData);
+	save.addEventListener("click", validate);
 	
 });

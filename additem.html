@@ -27,9 +27,10 @@ VFW 1210
     		<a href="additem.html" id ="addNew" style= "display:none;">Add Another Recipe</a>
     	</nav>
     	<br />
-    	<form action="#" method="post" id= "recipeForm" />
+    	<form action="#" method="post" id= "recipeForm">
     		<fieldset id = "recipeFieldset">
     			<legend>Add your new recipe!</legend>
+    			<ul id="errors"></ul>
     			<ul>
     				<li><label for="rname">Recipe Name:</label><input type="text" id="rname" /></li>
     				<li><label for="dateadded">Date:</label><input type="date" min="2012-09-25" max="2014-01-01" id="dateadded" placeholder="2012-09-25" /></li>
